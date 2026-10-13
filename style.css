@@ -3,3 +3,6 @@
 @media(max-width:800px){.hero{min-height:560px}.hero-inner{padding-top:70px}.intro,.emerging,.twocol{grid-template-columns:1fr}.cards,.quotes{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr;gap:25px}.contrast,.projects{grid-template-columns:1fr}.section-head{display:block}.flowline{display:grid;grid-template-columns:1fr}.flowline i{display:none}footer{flex-direction:column}}
 /* Imagens das atividades enviadas pelo formulário */
 .card-image{display:block;width:100%;height:190px;object-fit:cover;border-radius:4px;margin:0 0 18px;background:#e8e4da}
+
+/* Mapa interativo das experiências na Bahia */
+.map-intro{margin:25px 0 16px}.map-intro h3{font-family:Georgia,serif;font-size:1.8rem;margin:0 0 4px}.map-intro p{margin:0 0 14px;color:#5b625e}#bahiaMap{height:440px;width:100%;border:1px solid var(--line);border-radius:5px;z-index:0;background:#e3e9e3}.map-status{font-size:.88rem;color:#5b625e;margin:10px 0 42px}.map-popup{font-family:Arial,sans-serif;line-height:1.4}.map-popup>strong{font-size:1.1rem}.map-popup p{margin:6px 0}.map-popup ul{padding-left:18px;margin:6px 0}.map-popup li{margin-bottom:10px}@media(max-width:800px){#bahiaMap{height:350px}}
