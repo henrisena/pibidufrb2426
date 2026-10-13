@@ -1,5 +1,4 @@
 // Integração do mural ao vivo.
-// Cole em DATA_ENDPOINT a URL /exec do Google Apps Script após a implantação.
 const DATA_ENDPOINT = "https://script.google.com/macros/s/AKfycbwKPkvD3zo9JrQHUG83GFrA8g0C-QAAeaRKoT67025Ztl2ffeUaSPv959vgUxaspztsGA/exec";
 const REFRESH_MS = 10000;
 
@@ -16,7 +15,7 @@ const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&
 function counts(field){return Object.entries(contributions.reduce((o,x)=>{const v=x[field];if(v)o[v]=(o[v]||0)+1;return o},{})).sort((a,b)=>b[1]-a[1])}
 function render(){
  const data=current==="Todos"?contributions:contributions.filter(x=>x.area===current);
- document.querySelector("#cards").innerHTML=data.map(x=>`<article class="card"><span class="area">${esc(x.area).toUpperCase()}</span><h3>${esc(x.title)}</h3><p>${esc(x.text)}</p><div class="chips">${(x.tags||[]).map(t=>`<span>${esc(t)}</span>`).join("")}</div><div class="meta"><b>Produção:</b> ${esc(x.product)}<br>${esc(x.area)}${x.school?" · "+esc(x.school):""}</div></article>`).join("") || '<p>Aguardando as primeiras contribuições.</p>';
+ document.querySelector("#cards").innerHTML=data.map(x=>`<article class="card">${x.image?`<img class="card-image" src="${esc(x.image)}" alt="Imagem da atividade ${esc(x.title)}" loading="lazy">`:""}<span class="area">${esc(x.area).toUpperCase()}</span><h3>${esc(x.title)}</h3><p>${esc(x.text)}</p><div class="chips">${(x.tags||[]).map(t=>`<span>${esc(t)}</span>`).join("")}</div><div class="meta"><b>Produção:</b> ${esc(x.product)}<br>${esc(x.area)}${x.school?" · "+esc(x.school):""}</div></article>`).join("") || '<p>Aguardando as primeiras contribuições.</p>';
  const areas=["Todos",...uniq(contributions.map(x=>x.area))];
  document.querySelector("#filters").innerHTML=areas.map(a=>`<button class="${a===current?"active":""}" data-area="${esc(a)}">${esc(a)}</button>`).join("");
  document.querySelectorAll("#filters button").forEach(b=>b.onclick=()=>{current=b.dataset.area;render()});
@@ -41,7 +40,8 @@ async function loadLive(){
      area:String(x.area||"").trim(), school:String(x.school||"").trim(),
      title:String(x.title||"Sem título").trim(), text:String(x.description||x.text||"").trim(),
      product:String(x.product||"").trim(), reflection:String(x.reflection||"").trim(),
-     institution:String(x.institution||"").trim(),
+     institution:String(x.institution||"").trim(), city:String(x.city||"").trim(),
+     image:String(x.image||"").trim(),
      tags:Array.isArray(x.tags)?x.tags:String(x.tags||"").split(",").map(t=>t.trim()).filter(Boolean)
    })).filter(x=>x.area||x.title||x.text);
    usingLiveData=true; if(current!=="Todos" && !contributions.some(x=>x.area===current))current="Todos"; render();
