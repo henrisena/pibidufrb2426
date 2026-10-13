@@ -13,6 +13,7 @@ let contributions=[], current="Todos", usingLiveData=false;
 const mapCoordinates={"cruz das almas":[-12.6703,-39.1144]};
 const geocodePending=new Set();
 let bahiaMap=null, mapMarkers=null;
+const activityId=x=>cityKey([x.city,x.school,x.title].join("|")).replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
 const cityKey=s=>String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/\s*[-,]\s*(bahia|ba)$/i,"").trim();
 function initMap(){
  if(bahiaMap||!window.L)return;
@@ -54,10 +55,11 @@ const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&
 function counts(field){return Object.entries(contributions.reduce((o,x)=>{const v=x[field];if(v)o[v]=(o[v]||0)+1;return o},{})).sort((a,b)=>b[1]-a[1])}
 function render(){
  const data=current==="Todos"?contributions:contributions.filter(x=>x.area===current);
- document.querySelector("#cards").innerHTML=data.map(x=>`<article class="card">${x.image?`<img class="card-image" src="${esc(x.image)}" alt="Imagem da atividade ${esc(x.title)}" loading="lazy">`:""}<span class="area">${esc(x.area).toUpperCase()}</span><h3>${esc(x.title)}</h3><p>${esc(x.text)}</p><div class="chips">${(x.tags||[]).map(t=>`<span>${esc(t)}</span>`).join("")}</div><div class="meta"><b>Produção:</b> ${esc(x.product)}<br>${esc(x.area)}${x.school?" · "+esc(x.school):""}</div></article>`).join("") || '<p>Aguardando as primeiras contribuições.</p>';
+ document.querySelector("#cards").innerHTML=data.map(x=>`<article class="card" data-activity="${esc(activityId(x))}">${x.image?`<img class="card-image" src="${esc(x.image)}" alt="Imagem da atividade ${esc(x.title)}" loading="lazy">`:""}<span class="area">${esc(x.area).toUpperCase()}</span><h3>${esc(x.title)}</h3><p>${esc(x.text)}</p><div class="chips">${(x.tags||[]).map(t=>`<span>${esc(t)}</span>`).join("")}</div><div class="meta"><b>Produção:</b> ${esc(x.product)}<br>${esc(x.area)}${x.school?" · "+esc(x.school):""}</div><div class="card-conversation"><button type="button" class="comment-button" data-comment-id="${esc(activityId(x))}">💬 Comentar</button><div class="comment-list" data-comments-for="${esc(activityId(x))}"></div></div></article>`).join("") || '<p>Aguardando as primeiras contribuições.</p>';
  const areas=["Todos",...uniq(contributions.map(x=>x.area))];
  document.querySelector("#filters").innerHTML=areas.map(a=>`<button class="${a===current?"active":""}" data-area="${esc(a)}">${esc(a)}</button>`).join("");
  document.querySelectorAll("#filters button").forEach(b=>b.onclick=()=>{current=b.dataset.area;render()});
+ document.querySelectorAll(".comment-button").forEach(b=>b.onclick=()=>openCommentDialog(b.dataset.commentId));
  document.querySelector("#nContrib").textContent=contributions.length;
  document.querySelector("#nAreas").textContent=uniq(contributions.map(x=>x.area)).length;
  document.querySelector("#nInstit").textContent=uniq(contributions.map(x=>x.institution)).length;
@@ -91,3 +93,7 @@ async function loadLive(){
  }
 }
 render(); loadLive(); setInterval(loadLive,REFRESH_MS);
+
+function openCommentDialog(id){const item=contributions.find(x=>activityId(x)===id);if(!item)return;document.querySelector("#commentActivityId").value=id;document.querySelector("#commentTitle").textContent=item.title;document.querySelector("#commentText").value="";document.querySelector("#commentFeedback").textContent="";document.querySelector("#commentDialog").showModal();}
+const dlg=document.querySelector("#commentDialog");document.querySelector(".comment-close").onclick=()=>dlg.close();dlg.addEventListener("click",e=>{if(e.target===dlg)dlg.close()});
+document.querySelector("#commentForm").addEventListener("submit",async e=>{e.preventDefault();const feedback=document.querySelector("#commentFeedback");feedback.textContent="Preparando envio…";const payload={action:"comment",activityId:document.querySelector("#commentActivityId").value,name:document.querySelector("#commentName").value.trim(),area:document.querySelector("#commentArea").value.trim(),comment:document.querySelector("#commentText").value.trim()};if(!payload.comment){feedback.textContent="Escreva um comentário.";return}try{const res=await fetch(DATA_ENDPOINT,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(payload)});const out=await res.json();if(!out.ok)throw new Error(out.error||"Envio indisponível");feedback.textContent="Comentário enviado.";document.querySelector("#commentText").value="";setTimeout(()=>dlg.close(),900)}catch(err){feedback.textContent="Os comentários ainda precisam ser ativados no servidor. Nenhum texto foi perdido: copie seu comentário antes de fechar.";}});
