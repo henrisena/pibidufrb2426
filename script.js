@@ -10,6 +10,45 @@ const demoContributions=[
 ];
 
 let contributions=[], current="Todos", usingLiveData=false;
+const mapCoordinates={"cruz das almas":[-12.6703,-39.1144]};
+const geocodePending=new Set();
+let bahiaMap=null, mapMarkers=null;
+const cityKey=s=>String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/\s*[-,]\s*(bahia|ba)$/i,"").trim();
+function initMap(){
+ if(bahiaMap||!window.L)return;
+ bahiaMap=L.map("bahiaMap",{scrollWheelZoom:false}).setView([-12.6,-41.4],7);
+ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:18,attribution:"&copy; OpenStreetMap contributors"}).addTo(bahiaMap);
+ mapMarkers=L.layerGroup().addTo(bahiaMap);
+}
+async function locateCity(name){
+ const key=cityKey(name);
+ if(mapCoordinates[key]||geocodePending.has(key))return;
+ geocodePending.add(key);
+ try{
+  const url="https://nominatim.openstreetmap.org/search?city="+encodeURIComponent(name)+"&state=Bahia&country=Brazil&format=json&limit=3";
+  const res=await fetch(url);if(!res.ok)throw new Error("geocodificação indisponível");
+  const places=await res.json();
+  const place=places.find(p=>/Bahia/i.test(p.display_name||"") && Number(p.lat)<-8.4 && Number(p.lat)>-18.4 && Number(p.lon)<-37 && Number(p.lon)>-47);
+  if(place){mapCoordinates[key]=[Number(place.lat),Number(place.lon)];renderMap()}
+ }catch(e){console.warn("Não foi possível localizar o município:",name,e)}
+ finally{geocodePending.delete(key)}
+}
+function renderMap(){
+ initMap();if(!bahiaMap)return;
+ mapMarkers.clearLayers();
+ const groups=new Map();
+ contributions.forEach(x=>{if(!x.city)return;const key=cityKey(x.city);if(!groups.has(key))groups.set(key,{name:x.city,items:[]});groups.get(key).items.push(x)});
+ let located=0;
+ groups.forEach((group,key)=>{
+  const coords=mapCoordinates[key];if(!coords){locateCity(group.name);return}
+  located++;
+  const items=group.items.map(x=>`<li><strong>${esc(x.title)}</strong><br><small>${esc(x.area)} · ${esc(x.school)}</small></li>`).join("");
+  const popup=`<div class="map-popup"><strong>${esc(group.name)}</strong><p>${group.items.length} ${group.items.length===1?"contribuição":"contribuições"}</p><ul>${items}</ul></div>`;
+  L.circleMarker(coords,{radius:Math.min(16,8+group.items.length*2),color:"#fffdf8",weight:2,fillColor:"#bd4b32",fillOpacity:0.95}).addTo(mapMarkers).bindPopup(popup,{maxWidth:300});
+ });
+ document.querySelector("#mapStatus").textContent=located?`${located} ${located===1?"município representado":"municípios representados"} no mapa. Clique nos pontos para ver as propostas.`:"Ainda não há municípios localizados no mapa.";
+}
+
 const uniq=a=>[...new Set(a.filter(Boolean))];
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
 function counts(field){return Object.entries(contributions.reduce((o,x)=>{const v=x[field];if(v)o[v]=(o[v]||0)+1;return o},{})).sort((a,b)=>b[1]-a[1])}
@@ -28,6 +67,7 @@ function render(){
  document.querySelector("#tags").innerHTML=Object.entries(tagCounts).sort((a,b)=>b[1]-a[1]).map(([t,n])=>`<span style="font-size:${1+Math.min(n,4)*.18}rem">${esc(t)}</span>`).join("");
  document.querySelector("#areaList").innerHTML=counts("area").map(([x,n])=>`<div class="rank"><span>${esc(x)}</span><b>${n}</b></div>`).join("");
  document.querySelector("#instList").innerHTML=counts("institution").map(([x,n])=>`<div class="rank"><span>${esc(x)}</span><b>${n}</b></div>`).join("");
+ renderMap();
 }
 async function loadLive(){
  if(!DATA_ENDPOINT){document.querySelector("#updated").textContent="dados demonstrativos";return}
