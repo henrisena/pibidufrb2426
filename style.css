@@ -13,3 +13,6 @@
 #bahiaMap .leaflet-pane,#bahiaMap .leaflet-map-pane,#bahiaMap .leaflet-tile-pane,#bahiaMap .leaflet-overlay-pane,#bahiaMap .leaflet-marker-pane{position:absolute;left:0;top:0}
 #bahiaMap .leaflet-tile{max-width:none!important;max-height:none!important}
 #bahiaMap .leaflet-control-container{position:relative;z-index:800}
+
+/* Fotografias das atividades dentro do popup do mapa */
+.map-popup ul{list-style:none;padding:0;margin:10px 0 0}.map-popup .map-activity{margin:0;padding:0 0 12px}.map-popup .map-activity:last-child{padding-bottom:0}.map-activity-image{display:block;width:100%;height:145px;object-fit:cover;border-radius:4px;margin:0 0 9px;background:#e8e4da}.map-activity-text{line-height:1.35}.map-activity-text strong{font-family:Georgia,serif;font-size:1rem}.map-activity-text small{color:#5b625e}
