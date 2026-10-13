@@ -16,7 +16,7 @@ let bahiaMap=null, mapMarkers=null;
 const cityKey=s=>String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/\s*[-,]\s*(bahia|ba)$/i,"").trim();
 function initMap(){
  if(bahiaMap||!window.L)return;
- bahiaMap=L.map("bahiaMap",{scrollWheelZoom:false}).setView([-12.6,-41.4],7);
+ bahiaMap=L.map("bahiaMap",{scrollWheelZoom:false,zoomControl:true,minZoom:5,maxZoom:12,maxBounds:[[-19,-47.5],[-8,-36.5]],maxBoundsViscosity:0.8}).setView([-12.7,-41.5],6);
  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:18,attribution:"&copy; OpenStreetMap contributors"}).addTo(bahiaMap);
  mapMarkers=L.layerGroup().addTo(bahiaMap);
 }
