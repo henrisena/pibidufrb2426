@@ -6,3 +6,10 @@
 
 /* Mapa interativo das experiências na Bahia */
 .map-intro{margin:25px 0 16px}.map-intro h3{font-family:Georgia,serif;font-size:1.8rem;margin:0 0 4px}.map-intro p{margin:0 0 14px;color:#5b625e}#bahiaMap{height:440px;width:100%;border:1px solid var(--line);border-radius:5px;z-index:0;background:#e3e9e3}.map-status{font-size:.88rem;color:#5b625e;margin:10px 0 42px}.map-popup{font-family:Arial,sans-serif;line-height:1.4}.map-popup>strong{font-size:1.1rem}.map-popup p{margin:6px 0}.map-popup ul{padding-left:18px;margin:6px 0}.map-popup li{margin-bottom:10px}@media(max-width:800px){#bahiaMap{height:350px}}
+
+/* Garante que as camadas e os mosaicos permaneçam dentro do mapa */
+#bahiaMap{position:relative;overflow:hidden;isolation:isolate;max-width:100%;min-height:350px}
+#bahiaMap .leaflet-container{font:12px/1.5 Arial,Helvetica,sans-serif}
+#bahiaMap .leaflet-pane,#bahiaMap .leaflet-map-pane,#bahiaMap .leaflet-tile-pane,#bahiaMap .leaflet-overlay-pane,#bahiaMap .leaflet-marker-pane{position:absolute;left:0;top:0}
+#bahiaMap .leaflet-tile{max-width:none!important;max-height:none!important}
+#bahiaMap .leaflet-control-container{position:relative;z-index:800}
