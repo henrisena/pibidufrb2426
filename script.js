@@ -1,6 +1,6 @@
 // Integração do mural ao vivo.
 // Cole em DATA_ENDPOINT a URL /exec do Google Apps Script após a implantação.
-const DATA_ENDPOINT = "";
+const DATA_ENDPOINT = "https://script.google.com/macros/s/AKfycbwKPkvD3zo9JrQHUG83GFrA8g0C-QAAeaRKoT67025Ztl2ffeUaSPv959vgUxaspztsGA/exec";
 const REFRESH_MS = 10000;
 
 const demoContributions=[
@@ -10,7 +10,7 @@ const demoContributions=[
  {area:"Letras",title:"Vozes e narrativas do território",text:"Estudantes registram narrativas orais, editam os áudios e organizam uma coleção digital sobre modos de falar e contar histórias.",product:"Acervo sonoro",tags:["oralidade","território","arquivo"],institution:"UFRB",school:"Escola D",reflection:"O conhecimento produzido pela turma passa a circular para além da sala de aula."}
 ];
 
-let contributions=[...demoContributions], current="Todos", usingLiveData=false;
+let contributions=[], current="Todos", usingLiveData=false;
 const uniq=a=>[...new Set(a.filter(Boolean))];
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
 function counts(field){return Object.entries(contributions.reduce((o,x)=>{const v=x[field];if(v)o[v]=(o[v]||0)+1;return o},{})).sort((a,b)=>b[1]-a[1])}
@@ -44,7 +44,7 @@ async function loadLive(){
      institution:String(x.institution||"").trim(),
      tags:Array.isArray(x.tags)?x.tags:String(x.tags||"").split(",").map(t=>t.trim()).filter(Boolean)
    })).filter(x=>x.area||x.title||x.text);
-   usingLiveData=true; current="Todos"; render();
+   usingLiveData=true; if(current!=="Todos" && !contributions.some(x=>x.area===current))current="Todos"; render();
    document.querySelector("#updated").textContent="atualizado agora";
  }catch(e){
    document.querySelector("#updated").textContent=usingLiveData?"falha temporária · mantendo últimos dados":"aguardando conexão com a planilha";
