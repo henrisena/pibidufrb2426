@@ -42,9 +42,9 @@ function renderMap(){
  groups.forEach((group,key)=>{
   const coords=mapCoordinates[key];if(!coords){locateCity(group.name);return}
   located++;
-  const items=group.items.map(x=>`<li><strong>${esc(x.title)}</strong><br><small>${esc(x.area)} · ${esc(x.school)}</small></li>`).join("");
+  const items=group.items.map(x=>`<li class="map-activity">${x.image?`<img class="map-activity-image" src="${esc(x.image)}" alt="Imagem da atividade ${esc(x.title)}">`:""}<div class="map-activity-text"><strong>${esc(x.title)}</strong><br><small>${esc(x.area)}${x.school?" · "+esc(x.school):""}</small></div></li>`).join("");
   const popup=`<div class="map-popup"><strong>${esc(group.name)}</strong><p>${group.items.length} ${group.items.length===1?"contribuição":"contribuições"}</p><ul>${items}</ul></div>`;
-  L.circleMarker(coords,{radius:Math.min(16,8+group.items.length*2),color:"#fffdf8",weight:2,fillColor:"#bd4b32",fillOpacity:0.95}).addTo(mapMarkers).bindPopup(popup,{maxWidth:300});
+  L.circleMarker(coords,{radius:Math.min(16,8+group.items.length*2),color:"#fffdf8",weight:2,fillColor:"#bd4b32",fillOpacity:0.95}).addTo(mapMarkers).bindPopup(popup,{maxWidth:340,minWidth:250});
  });
  document.querySelector("#mapStatus").textContent=located?`${located} ${located===1?"município representado":"municípios representados"} no mapa. Clique nos pontos para ver as propostas.`:"Ainda não há municípios localizados no mapa.";
 }
